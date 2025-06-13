@@ -7,8 +7,12 @@ unmetalikes_to_parsers = {unmeta = "text"}
 function register_parser(name, parsing_func, write_equ, meta_equ, unmeta_equ, unittype, tiling, layer)
     table.insert(broad_nouns, name)
     parsingfuncs[name] = parsing_func
-    metalikes_to_parsers[meta_equ] = name
-    unmetalikes_to_parsers[unmeta_equ] = name
+    if meta_equ ~= nil then
+        metalikes_to_parsers[meta_equ] = name
+    end
+    if unmeta_equ ~= nil then
+        unmetalikes_to_parsers[unmeta_equ] = name
+    end
     parser_extra_data[name] = {unittype = unittype, tiling = tiling, layer = layer}
     writelikes_to_parsers[write_equ] = name
 end
