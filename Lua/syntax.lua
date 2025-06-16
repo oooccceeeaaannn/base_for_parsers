@@ -91,12 +91,15 @@ function addunit(id,undoing_,levelstart_)
 			if (unitlists[matname] == nil) then
 				unitlists[matname] = {}
 			end
-		elseif (unit.values[TYPE] == 5 or (unit.values[TYPE] == 4 and unit.strings[UNITNAME] == "text_text_")) then
+		elseif (unit.values[TYPE] == 5 or (unit.values[TYPE] == 4 and (string.sub(name__,1,5) == "text_") and is_str_special_prefix(string.sub(name__,6)))) then
 			table.insert(letterunits, unit.fixed)
 		end
 	end
 
-	if is_parser(unit) then updatecode = 1 end
+	if is_parser(unit) then
+		updatecode = 1 
+		table.insert(parserunits, unit.fixed)
+	end
 
 	unit.colour = {}
 

@@ -97,6 +97,15 @@ function delunit(unitid)
 			end
 		end
 
+		if is_parser(unit) and (parserunits ~= nil) then
+			for i,v in pairs(parserunits) do
+				if (v == unitid) then
+					v = {}
+					table.remove(parserunits, i)
+				end
+			end
+		end
+
 		if (unit.values[TILING] > 1) and (animunits ~= nil) then
 			for i,v in pairs(animunits) do
 				if (v == unitid) then

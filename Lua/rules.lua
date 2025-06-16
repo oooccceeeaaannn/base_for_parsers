@@ -76,7 +76,7 @@ function code(alreadyrun_)
 				end
 			end
 
-			if (#checkthese > 0) or (#letterunits > 0) then
+			if (#checkthese > 0) or (#letterunits > 0) or (#parserunits > 0) then
 				for iid,unitid in ipairs(checkthese) do
 					local unit = mmf.newObject(unitid)
 					local x,y = unit.values[XPOS],unit.values[YPOS]
