@@ -547,7 +547,7 @@ function addoption(option,conds_,ids,visible,notrule,tags_,visualonly_)
 		local targetnot = string.sub(target, 1, 4)
 		local targetnot_ = string.sub(target, 5)
 
-		if (targetnot == "not ") and (objectlist[targetnot_] ~= nil) and (string.sub(targetnot_, 1, 5) ~= "group") and (string.sub(effect, 1, 5) ~= "group") and (string.sub(effect, 1, 9) ~= "not group") or (((string.sub(effect, 1, 5) == "group") or (string.sub(effect, 1, 9) == "not group")) and (targetnot_ == "all")) then
+		if (targetnot == "not ") and ((objectlist[targetnot_] ~= nil) or (targetnot_ == "all")) and (string.sub(targetnot_, 1, 5) ~= "group") and (string.sub(effect, 1, 5) ~= "group") and (string.sub(effect, 1, 9) ~= "not group") or (((string.sub(effect, 1, 5) == "group") or (string.sub(effect, 1, 9) == "not group")) and (targetnot_ == "all")) then
 			if (targetnot_ ~= "all") then
 				if (is_str_special_prefixed(targetnot_)) then
 					local pref = get_pref(targetnot_)

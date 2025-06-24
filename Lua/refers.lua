@@ -2,8 +2,12 @@ condlist['refers'] = function(params,checkedconds,checkedconds_,cdata)
 	for i, j in pairs(params) do
 		local passedthischeck = false
 		local _params = " " .. j
+		if cdata.unitid ~= 2 then
+			local unitname = mmf.newObject(cdata.unitid).strings[UNITNAME]
+		else
+			local unitname = "empty"
+		end
 
-		local unitname = mmf.newObject(cdata.unitid).strings[UNITNAME]
 		_params = string.sub(_params, 2)
         
 		if get_ref(unitname) == _params then
