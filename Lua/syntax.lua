@@ -1,5 +1,9 @@
 -- Implement FULLUNITLIST, add units to meta# unitlist (for WITHOUT), and fix sprites on auto generation.
 function addunit(id,undoing_,levelstart_)
+	if (levelstart_ == true) and (#objectpalette == 0) then
+		createobjectpalette()
+	end
+
 	local unitid = #units + 1
 
 	units[unitid] = {}
