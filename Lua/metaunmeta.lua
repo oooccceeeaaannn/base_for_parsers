@@ -151,22 +151,22 @@ function conversion(dolevels_)
 							if (target == name) and (object ~= "word") and ((object ~= name) or (verb == "become")) then
 								if not is_str_broad_noun(object) and (object ~= "revert") and (object ~= "createall") and (not is_str_metalike_prop(object)) and (string.sub(object,1,4) ~= "meta") then
 									if (object == "not " .. name) then
-										table.insert(output, {"error", conds, "is"})
+										table.insert(output, {"error", conds, verb})
 
 									elseif is_str_special_prefixed(object) then
-										table.insert(output, {object, conds, "is"})
+										table.insert(output, {object, conds, verb})
 									else
 										for d,mat in pairs(objectlist) do
 											if (string.sub(d, 1, 5) ~= "group") and ((d == object)) then
-												table.insert(output, {object, conds, "is"})
+												table.insert(output, {object, conds, verb})
 											end
 										end
 									end
 								elseif (name ~= object) or (verb == "become") then
 									if (object ~= "revert") and (not is_str_metalike_prop(object)) then --Note: I don't actually think meta/unmeta needs to be placed at the front.
-										table.insert(output, {object, conds, "is"})
+										table.insert(output, {object, conds, verb})
 									else
-										table.insert(output, 1, {object, conds, "is"})
+										table.insert(output, 1, {object, conds, verb})
 									end
 								end
 							end
@@ -186,7 +186,7 @@ function conversion(dolevels_)
 						local conds = v3[2]
 						local op = v3[3]
 
-						if (op == "is") then
+						if (op == "is") or (op == "become") then
 							local metaparser = metalikes_to_parsers[object]
 							local unmetaparser = unmetalikes_to_parsers[object]
 							if (findnoun(object,nlist.brief) == false) and (object ~= "word") and not is_str_broad_noun(object) and (not is_str_metalike_prop(object)) then
@@ -442,184 +442,6 @@ function convert(stuff,mats,dolevels_)
 	end
 end
 
-function convert(stuff,mats,dolevels_)
-	local layer = map[0]
-	local delthese = {}
-	local mat1 = stuff
-	local dolevels = dolevels_ or false
-	local donewid = false
-	
-	if (dolevels == false) then
-		if (mat1 ~= "empty") then
-			local targets = {}
-			
-			if (unitlists[mat1] ~= nil) then
-				targets = unitlists[mat1]
-			end
-			
-			if (editor2.values[CURSORSEXIST] == 1) then
-				if (featureindex[mat1] ~= nil) then
-					for i,v in ipairs(featureindex[mat1]) do
-						local rule = v[1]
-						
-						if (rule[2] == "is") and (rule[3] == "select") then
-							editor.values[NAMEFLAG] = 0
-							break
-						end
-					end
-				end
-			end
-			
-			if (#targets > 0) then
-				for i,mat in pairs(mats) do
-					if (mat[1] == "createall") then
-						donewid = true
-						break
-					end
-				end
-				
-				for i,unitid in pairs(targets) do
-					local unit = mmf.newObject(unitid)
-					local x,y,dir,id = unit.values[XPOS],unit.values[YPOS],unit.values[DIR],unit.values[ID]
-					local name = getname(unit)
-					
-					local reverting = false
-					local mats2 = {}
-
-					if (unit.flags[CONVERTED] == false) then
-						for a,matdata in pairs(mats) do
-							local mat2 = matdata[1]
-							local conds = matdata[2]
-							local op = matdata[3]
-							
-							if is_str_writelike_verb(op) then
-								mat2 = writelikes_to_parsers[op] .. "_" .. matdata[1]
-							end
-							
-							if (reverting == false) then
-								local objectfound = false
-								
-								if (unitreference[mat2] ~= nil) and (mat2 ~= "level") then
-									local object = unitreference[mat2]
-									
-									if (tileslist[object]["name"] == mat2) and ((changes[object] == nil) or (changes[object]["name"] == nil)) then
-										objectfound = true
-									elseif (changes[object] ~= nil) then
-										if (changes[object]["name"] ~= nil) and (changes[object]["name"] == mat2) then
-											objectfound = true
-										end
-									end
-								else
-									objectfound = true
-								end
-								
-								if testcond(conds,unit.fixed) and objectfound then
-									local ingameid = 0
-									if (a == 1) and (donewid == false) then
-										ingameid = id
-									elseif (a > 1) or donewid then
-										ingameid = newid()
-									end
-									
-									if (mat2 == "revert") then
-										if (unit.strings[UNITNAME] ~= unit.originalname) then
-											reverting = true
-										end
-									end
-									
-									if (mat2 ~= "revert") or ((mat2 == "revert") and reverting) then
-										table.insert(mats2, {mat2,ingameid,id})
-										unit.flags[CONVERTED] = true
-									end
-								end
-							else
-								break
-							end
-						end
-					end
-					
-					if (#mats2 > 0) then
-						addaction(unit.fixed,{"convert",mats2})
-					end
-				end
-			end
-		elseif (mat1 == "empty") then
-			local convunitmap = {}
-			
-			for a,unit in pairs(units) do
-				local tileid = unit.values[XPOS] + unit.values[YPOS] * roomsizex
-				convunitmap[tileid] = 1
-			end
-			
-			for i=0,roomsizex-1 do
-				for j=0,roomsizey-1 do
-					local empty = true
-					local mats2 = {}
-					
-					local tileid = i + j * roomsizex
-					if (convunitmap[tileid] ~= nil) then
-						empty = false
-					end
-					
-					if (emptydata[tileid] ~= nil) then
-						if (emptydata[tileid]["conv"] ~= nil) and emptydata[tileid]["conv"] then
-							empty = false
-						end
-					end
-					
-					if (layer:get_x(i,j) ~= 255) then
-						empty = false
-					end
-					
-					if empty then
-						for a,matdata in pairs(mats) do
-							local mat2 = matdata[1]
-							local conds = matdata[2]
-							local op = matdata[3]
-							
-							if is_str_writelike_verb(op) then
-								mat2 = writelikes_to_parsers[op] .. "_" .. matdata[1]
-							end
-							
-							local objectfound = false
-							
-							if (unitreference[mat2] ~= nil) and (mat2 ~= "level") then
-								local object = unitreference[mat2]
-								
-								if (tileslist[object]["name"] == mat2) and ((changes[object] == nil) or (changes[object]["name"] == nil)) then
-									objectfound = true
-								elseif (changes[object] ~= nil) then
-									if (changes[object]["name"] ~= nil) and (changes[object]["name"] == mat2) then
-										objectfound = true
-									end
-								end
-							elseif (mat2 ~= "revert") then
-								objectfound = true
-							end
-
-							if (mat2 ~= "empty") and objectfound then
-								if testcond(conds,2,i,j) then
-									table.insert(mats2, {mat2,i,j})
-								end
-							end
-						end
-					end
-					
-					if (#mats2 > 0) then
-						addaction(2,{"emptyconvert",mats2})
-					end
-				end
-			end
-		end
-	end
-	
-	if (mat1 == "level") and dolevels then
-		for i,v in ipairs(mats) do
-			table.insert(levelconversions, v)
-		end
-	end
-end
-
 function dolevelconversions()
 	if (#features > 0) and (generaldata.values[WINTIMER] == 0) and (destroylevel_check == false) then
 		local mats = levelconversions
@@ -633,11 +455,16 @@ function dolevelconversions()
 			local mat2 = matdata[1]
 			local op = matdata[3]
 			
-							if is_str_writelike_verb(op) then
-								mat2 = writelikes_to_parsers[op] .. "_" .. matdata[1]
-							end
+			if is_str_writelike_verb(op) then
+				mat2 = writelikes_to_parsers[op] .. "_" .. matdata[1]
+			end
 			
 			local objectfound = false
+
+			if (op == "become") and (mat2 == "level") then
+				op = "is"
+				mat2 = "revert"
+			end
 			
 			if (unitreference[mat2] ~= nil) then
 				local object = unitreference[mat2]

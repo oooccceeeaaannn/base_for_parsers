@@ -79,7 +79,7 @@ function undo()
 					local baseuid = line[7] or -1
 					
 					if (paradox[uid] == nil) and (paradox[baseuid] == nil) then
-						local x,y,dir,levelfile,levelname,vislevel,complete,visstyle,maplevel,colour,clearcolour,followed,back_init,ogname,signtext = line[3],line[4],line[5],line[8],line[9],line[10],line[11],line[12],line[13],line[14],line[15],line[16],line[17],line[18],line[19]
+						local x,y,dir,levelfile,levelname,vislevel,complete,visstyle,maplevel,colour,clearcolour,followed,back_init,ogname,signtext,holder = line[3],line[4],line[5],line[8],line[9],line[10],line[11],line[12],line[13],line[14],line[15],line[16],line[17],line[18],line[19],line[20]
 						local name = line[2]
 						
 						local unitname = ""
@@ -121,6 +121,8 @@ function undo()
 						addunit(unitid,true)
 						addunitmap(unitid,x,y,unit.strings[UNITNAME])
 						dynamic(unitid)
+
+						unit.holder = holder
 						
 						unit.followed = followed
 						unit.back_init = back_init
@@ -324,6 +326,8 @@ function undo()
 					local unit = mmf.newObject(unitid)
 					
 					unit.holder = line[3]
+				else
+					undocall(style,line)
 				end
 			end
 		end

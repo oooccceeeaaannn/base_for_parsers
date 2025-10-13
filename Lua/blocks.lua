@@ -59,11 +59,13 @@ function effectblock()
 	
 	for i,unit in ipairs(units) do
 		unit.new = false
+		unit.flags[LEVELVISOVERRIDE] = false
 		
 		if (levelhide == nil) then
 			unit.visible = true
 		else
 			unit.visible = false
+			unit.flags[LEVELVISOVERRIDE] = true
 		end
 		
 		if (unit.className ~= "level") then		
@@ -146,8 +148,8 @@ function effectblock()
 		
 		for i,unitid in ipairs(ishide) do
 			local unit = mmf.newObject(unitid)
-			
 			unit.visible = false
+			unit.flags[LEVELVISOVERRIDE] = true
 		end
 	end
 end
@@ -225,7 +227,6 @@ function startblock(light_)
 			--local isfollow = xthis(unitrules,name,"follow")
 			local isfloat = isthis(unitrules,"float")
 			local sleep = isthis(unitrules,"sleep")
-			local ismake = xthis(unitrules,name,"make")
 
 			--[[
 			local isright = isthis(unitrules,"right")
@@ -417,23 +418,24 @@ function block(small_)
 		end
 	end
 
-	if true then -- Hold support
-		local ishold = getunitswitheffect("hold",false,delthese)
-		local holders = {}
-
-		for id,unit in ipairs(ishold) do
-			local x,y = unit.values[XPOS],unit.values[YPOS]
-			local tileid = x + y * roomsizex
-			holders[unit.values[ID]] = 1
-
-			if (unitmap[tileid] ~= nil) then
-				local water = findallhere(x,y)
-
-				if (#water > 0) then
-					for a,b in ipairs(water) do
-						if floating(b,unit.fixed,x,y) then
-							if (b ~= unit.fixed) then
-								local bunit = mmf.newObject(b)
+	local ishold = getunitswitheffect("hold",false,delthese)
+	local holders = {}
+	
+	for id,unit in ipairs(ishold) do
+		local x,y = unit.values[XPOS],unit.values[YPOS]
+		local tileid = x + y * roomsizex
+		holders[unit.values[ID]] = unit.fixed
+		
+		if (unitmap[tileid] ~= nil) then
+			local water = findallhere(x,y)
+			
+			if (#water > 0) then
+				for a,b in ipairs(water) do
+					if floating(b,unit.fixed,x,y) then
+						if (b ~= unit.fixed) then
+							local bunit = mmf.newObject(b)
+							
+							if (bunit.holder ~= unit.values[ID]) then
 								addundo({"holder",bunit.values[ID],bunit.holder,unit.values[ID],},unitid)
 								bunit.holder = unit.values[ID]
 							end
@@ -442,22 +444,27 @@ function block(small_)
 				end
 			end
 		end
-
-		for i,unit in ipairs(units) do
-			if (unit.holder ~= nil) and (unit.holder ~= 0) then
-				if (holders[unit.holder] ~= nil) then
-					local unitid = getunitid(unit.holder)
-					local bunit = mmf.newObject(unitid)
-					local x,y = bunit.values[XPOS],bunit.values[YPOS]
-
-					update(unit.fixed,x,y,unit.values[DIR])
-				else
+	end
+	
+	for i,unit in ipairs(units) do
+		if (unit.holder ~= nil) and (unit.holder ~= 0) then
+			if (holders[unit.holder] ~= nil) then
+				local unitid = getunitid(unit.holder)
+				local bunit = mmf.newObject(unitid)
+				local x,y = bunit.values[XPOS],bunit.values[YPOS]
+				
+				update(unit.fixed,x,y,unit.values[DIR])
+				
+				if (floating(unit.fixed,unitid,x,y) == false) then
 					addundo({"holder",unit.values[ID],unit.holder,0,},unitid)
 					unit.holder = 0
 				end
 			else
+				addundo({"holder",unit.values[ID],unit.holder,0,},unitid)
 				unit.holder = 0
 			end
+		else
+			unit.holder = 0
 		end
 	end
 
@@ -905,6 +912,51 @@ function block(small_)
 
 	delthese,doremovalsound = handledels(delthese,doremovalsound)
 
+		
+	if (featureindex["hold"] ~= nil) then
+		local ishold = getunitswitheffect("hold",false,delthese)
+		local holders = {}
+		
+		for id,unit in ipairs(ishold) do
+			local x,y = unit.values[XPOS],unit.values[YPOS]
+			local tileid = x + y * roomsizex
+			holders[unit.values[ID]] = 1
+			
+			if (unitmap[tileid] ~= nil) then
+				local water = findallhere(x,y)
+				
+				if (#water > 0) then
+					for a,b in ipairs(water) do
+						if floating(b,unit.fixed,x,y) then
+							if (b ~= unit.fixed) then
+								local bunit = mmf.newObject(b)
+								addundo({"holder",bunit.values[ID],bunit.holder,unit.values[ID],},unitid)
+								bunit.holder = unit.values[ID]
+							end
+						end
+					end
+				end
+			end
+		end
+		
+		for i,unit in ipairs(units) do
+			if (unit.holder ~= nil) and (unit.holder ~= 0) then
+				if (holders[unit.holder] ~= nil) then
+					local unitid = getunitid(unit.holder)
+					local bunit = mmf.newObject(unitid)
+					local x,y = bunit.values[XPOS],bunit.values[YPOS]
+					
+					update(unit.fixed,x,y,unit.values[DIR])
+				else
+					addundo({"holder",unit.values[ID],unit.holder,0,},unitid)
+					unit.holder = 0
+				end
+			else
+				unit.holder = 0
+			end
+		end
+	end
+
 	isyou = getunitswitheffect("you",false,delthese)
 	isyou2 = getunitswitheffect("you2",false,delthese)
 	isyou3 = getunitswitheffect("3d",false,delthese)
@@ -1017,6 +1069,8 @@ function block(small_)
 	end
 
 	delthese,doremovalsound = handledels(delthese,doremovalsound)
+
+	do_mod_hook("block")
 
 	for i,unit in ipairs(units) do
 		if (inbounds(unit.values[XPOS],unit.values[YPOS],1) == false) then
@@ -1366,7 +1420,7 @@ function moveblock(onlystartblock_)
 									end
 								end
 
-								addundo({"remove",unit.strings[UNITNAME],unit.values[XPOS],unit.values[YPOS],unit.values[DIR],unit.values[ID],unit.values[ID],unit.strings[U_LEVELFILE],unit.strings[U_LEVELNAME],unit.values[VISUALLEVEL],unit.values[COMPLETED],unit.values[VISUALSTYLE],unit.flags[MAPLEVEL],unit.strings[COLOUR],unit.strings[CLEARCOLOUR],unit.followed,unit.back_init,unit.originalname})
+								addundo({"remove",unit.strings[UNITNAME],unit.values[XPOS],unit.values[YPOS],unit.values[DIR],unit.values[ID],unit.values[ID],unit.strings[U_LEVELFILE],unit.strings[U_LEVELNAME],unit.values[VISUALLEVEL],unit.values[COMPLETED],unit.values[VISUALSTYLE],unit.flags[MAPLEVEL],unit.strings[COLOUR],unit.strings[CLEARCOLOUR],unit.followed,unit.back_init,unit.originalname,unit.holder})
 
 								for a,b in ipairs(delname) do
 									MF_alert("added undo for " .. b[1] .. " with ID " .. tostring(b[2]))

@@ -1154,15 +1154,23 @@ function subrules()
 								table.insert(newtags, d)
 							end
 
+							table.insert(newtags, "mimicparent_" .. tostring(i))
 							table.insert(newtags, "mimic")
-
+							
 							local newword1 = object
 							local newword2 = trule[2]
 							local newword3 = trule[3]
-
+							
 							local newrule = {newword1, newword2, newword3}
-
-							addoption(newrule,newconds,ids,visual,nil,newtags,visualonly)
+							
+							limiter = limiter + 1
+							addoption(newrule,newconds,ids,true,nil,newtags,visualonly)
+							
+							if (limiter > limit) then
+								MF_alert("Level destroyed - mimic happened too many times!")
+								destroylevel("toocomplex")
+								return
+							end
 						end
 					end
 				end
