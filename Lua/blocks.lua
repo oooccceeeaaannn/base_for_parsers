@@ -453,9 +453,28 @@ function block(small_)
 				local bunit = mmf.newObject(unitid)
 				local x,y = bunit.values[XPOS],bunit.values[YPOS]
 				
-				update(unit.fixed,x,y,unit.values[DIR])
+				local name = getname(unit)
+				local hdir = 4
+				local ox = x - unit.values[XPOS]
+				local oy = y - unit.values[YPOS]
+				if (ox > 0) and (oy == 0) then
+					hdir = 0
+				elseif (ox == 0) and (oy < 0) then
+					hdir = 1
+				elseif (ox < 0) and (oy == 0) then
+					hdir = 2
+				elseif (ox == 0) and (oy > 0) then
+					hdir = 3
+				end
 				
-				if (floating(unit.fixed,unitid,x,y) == false) then
+				if (cantmove(name,unit.fixed,hdir,unit.values[XPOS],unit.values[YPOS]) == false) then
+					update(unit.fixed,x,y,unit.values[DIR])
+					
+					if (floating(unit.fixed,unitid,x,y) == false) then
+						addundo({"holder",unit.values[ID],unit.holder,0,},unitid)
+						unit.holder = 0
+					end
+				else
 					addundo({"holder",unit.values[ID],unit.holder,0,},unitid)
 					unit.holder = 0
 				end

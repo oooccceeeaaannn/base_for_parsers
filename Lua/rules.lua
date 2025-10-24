@@ -1163,14 +1163,7 @@ function subrules()
 							
 							local newrule = {newword1, newword2, newword3}
 							
-							limiter = limiter + 1
-							addoption(newrule,newconds,ids,true,nil,newtags,visualonly)
-							
-							if (limiter > limit) then
-								MF_alert("Level destroyed - mimic happened too many times!")
-								destroylevel("toocomplex")
-								return
-							end
+							addoption(newrule,newconds,ids,visual,nil,newtags,visualonly)		
 						end
 					end
 				end
