@@ -2,8 +2,8 @@
 ## Important Message
 This repo is based on [Baba Is You - Better Metatext](https://github.com/EmilyEmmi/Baba-Is-You---Metatext-Mod) by [Emily](https://github.com/EmilyEmmi).
 ## What does this repo do?
-As the name suggests, this repo provides a base for tyou to create new unique parsers.
-This base automatically deals with these things:
+As the name suggests, this repo provides a base for you to create new unique parsers.
+This reop automatically deals with these behaviours:
 - The Broad Noun behaviour \(e.g. TEXT noun refers to all text, IS & HAS & MAKE TEXT, etc\)
 - The meta\[parser\] behaviour \(e.g. TEXT_BABA refers to pieces of text that refers to BABA\)
 - The Mixed Broad Noun behaviour \(e.g. TEXT HAS GLYPH makes pieces of TEXT drop GLYPH_TEXT upon destruction\)
