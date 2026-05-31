@@ -860,6 +860,108 @@ function getmetalevel(str)
 	return metalevel
 end
 
+-- Remove lines that include "text" rules if rule1 starts with "text_".
+function hasfeature(rule1, rule2, rule3, unitid, x, y, checkedconds, ignorebroken_)
+    local ignorebroken = false
+    if (ignorebroken_ ~= nil) then
+        ignorebroken = ignorebroken_
+    end
+
+    if (rule1 ~= nil) and (rule2 ~= nil) and (rule3 ~= nil) then
+        if (featureindex[rule1] ~= nil) then
+            for i, rules in ipairs(featureindex[rule1]) do
+                local rule = rules[1]
+                local conds = rules[2]
+
+                if (conds[1] ~= "never") then
+                    if (rule[1] == rule1) and (rule[2] == rule2) and (rule[3] == rule3) then
+                        if testcond(conds, unitid, x, y, nil, nil, checkedconds, ignorebroken) then
+                            return true
+                        end
+                    end
+                end
+            end
+        end
+
+        --[[ No bad don't
+    if (string.sub(rule1,1,5) == "text_") and (featureindex["text"] ~= nil) then
+            for i,rules in ipairs(featureindex["text"]) do
+                local rule = rules[1]
+                local conds = rules[2]
+
+                if (conds[1] ~= "never") then
+                    if (rule[1] == "text") and (rule[2] == rule2) and (rule[3] == rule3) then
+                        if testcond(conds,unitid,x,y,nil,nil,checkedconds,ignorebroken) then
+                            return true
+                        end
+                    end
+                end
+            end
+        end]]
+    end
+
+    if (rule3 ~= nil) and (rule2 ~= nil) and (rule1 ~= nil) then
+        if (featureindex[rule3] ~= nil) then
+            for i, rules in ipairs(featureindex[rule3]) do
+                local rule = rules[1]
+                local conds = rules[2]
+
+                if (conds[1] ~= "never") then
+                    if (rule[1] == rule1) and (rule[2] == rule2) and (rule[3] == rule3) then
+                        if testcond(conds, unitid, x, y, nil, nil, checkedconds, ignorebroken) then
+                            return true
+                        end
+                    end
+                end
+            end
+        end
+
+        --[[ No bad don't
+        if (string.sub(rule3,1,5) == "text_") and (featureindex["text"] ~= nil) then
+            for i,rules in ipairs(featureindex["text"]) do
+                local rule = rules[1]
+                local conds = rules[2]
+
+                if (conds[1] ~= "never") then
+                    if (rule[1] == rule1) and (rule[2] == rule2) and (rule[3] == "text") then
+                        if testcond(conds,unitid,x,y,nil,nil,checkedconds,ignorebroken) then
+                            return true
+                        end
+                    end
+                end
+            end
+        end]]
+    end
+
+    if (featureindex[rule2] ~= nil) and (rule1 ~= nil) and (rule3 == nil) then
+        local usable = false
+
+        if (featureindex[rule1] ~= nil) then
+            for i, rules in ipairs(featureindex[rule1]) do
+                local rule = rules[1]
+                local conds = rules[2]
+
+                if (conds[1] ~= "never") then
+                    for a, mat in pairs(objectlist) do
+                        if (a == rule[1]) then
+                            usable = true
+                            break
+                        end
+                    end
+
+                    if (rule[1] == rule1) and (rule[2] == rule2) and usable then
+                        if testcond(conds, unitid, x, y, nil, nil, checkedconds, ignorebroken) then
+                            return true
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+    return nil
+end
+
 -- Fix issue with TEXT MAKE TEXT
 function getunitswithverb(rule2, ignorethese_, checkedconds)
 	local group = {}

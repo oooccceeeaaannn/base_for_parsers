@@ -870,7 +870,7 @@ function block(small_)
 								break
 							end
 						end
-						if not exists and is_str_special_prefixed(name) then
+						if not exists then
 							exists = tryautogenerate(v .. "_" .. name,name)
 						end
 					end
