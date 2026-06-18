@@ -36,12 +36,15 @@ function code(alreadyrun_)
 			local checkthese = {}
 			local wordidentifier = ""
 			wordunits,wordidentifier,wordrelatedunits = findwordunits()
-
+			local wordunitresult = {}
+			
 			if (#wordunits > 0) then
 				for i,v in ipairs(wordunits) do
 					if testcond(v[2],v[1]) then
-						local unit = mmf.newObject(v[1])
+						wordunitresult[v[1]] = 1
 						table.insert(checkthese, v[1])
+					else
+						wordunitresult[v[1]] = 0
 					end
 				end
 			end
@@ -96,8 +99,8 @@ function code(alreadyrun_)
 
 							--MF_alert("Doing firstwords check for " .. unit.strings[UNITNAME] .. ", dir " .. tostring(i))
 
-							local hm = codecheck(unitid,ox,oy,i)
-							local hm2 = codecheck(unitid,nox,noy,i,false,true) -- count letters
+							local hm = codecheck(unitid,ox,oy,i,false,wordunitresult)
+							local hm2 = codecheck(unitid,nox,noy,i,false,wordunitresult,true) -- count letters
 
 							if (#hm == 0) and (#hm2 > 0) then
 								--MF_alert("Added " .. unit.strings[UNITNAME] .. " to firstwords, dir " .. tostring(i))
@@ -226,7 +229,7 @@ function code(alreadyrun_)
 end
 
 -- also fixes text prefix with letters (that's what parse_letter is for)
-function codecheck(unitid,ox,oy,cdir_,ignore_end_,parse_letter)
+function codecheck(unitid,ox,oy,cdir_,ignore_end_,wordunitresult_,parse_letter)
 	local unit = mmf.newObject(unitid)
 	local ux,uy = unit.values[XPOS],unit.values[YPOS]
 	local x = unit.values[XPOS] + ox
@@ -235,6 +238,7 @@ function codecheck(unitid,ox,oy,cdir_,ignore_end_,parse_letter)
 	local letters = false
 	local justletters = false
 	local cdir = cdir_ or 0
+	local wordunitresult = wordunitresult_ or {}
 
 	local ignore_end = false
 	if (ignore_end_ ~= nil) then
@@ -257,13 +261,23 @@ function codecheck(unitid,ox,oy,cdir_,ignore_end_,parse_letter)
 					table.insert(result, {{b}, w, v.strings[NAME], v.values[TYPE], cdir})
 				else
 					if (#wordunits > 0) then
-						for c,d in ipairs(wordunits) do
-							if (b == d[1]) and testcond(d[2],d[1]) then
-								if metatext_textisword and (string.sub(v.strings[UNITNAME],1,5) == "text_") then
-									table.insert(result, {{b}, w, v.strings[NAME], v.values[TYPE], cdir})
-								else
-									table.insert(result, {{b}, w, get_broaded_str(v.strings[UNITNAME]), v.values[TYPE], cdir})
+						local valid = false
+						
+						if (wordunitresult[b] ~= nil) and (wordunitresult[b] == 1) then
+							valid = true
+						elseif (wordunitresult[b] == nil) then
+							for c,d in ipairs(wordunits) do
+								if (b == d[1]) and testcond(d[2],d[1]) then
+									valid = true
+									break
 								end
+							end
+						end
+						if valid then
+							if metatext_textisword and (string.sub(v.strings[UNITNAME],1,5) == "text_") then
+								table.insert(result, {{b}, w, v.strings[NAME], v.values[TYPE], cdir})
+							else
+								table.insert(result, {{b}, w, get_broaded_str(v.strings[UNITNAME]), v.values[TYPE], cdir})
 							end
 						end
 					end
