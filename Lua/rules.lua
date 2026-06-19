@@ -2407,7 +2407,7 @@ function calculatesentences(unitid,x,y,dir)
 
 	local done = false
 	while (done == false) and (totalvariants < limiter) do
-		local words,letters,jletters = codecheck(unitid,ox*rstep,oy*rstep,dir,true,(step~=0))
+		local words,letters,jletters = codecheck(unitid,ox*rstep,oy*rstep,dir,true,nil,(step~=0))
 
 		--MF_alert(tostring(unitid) .. ", " .. unit.strings[UNITNAME] .. ", " .. tostring(#words))
 
