@@ -9,6 +9,7 @@ function addbaserule(rule1,rule2,rule3,conds_)
 	addoption(rule,conds,{},false,nil,{"base"})
 end
 
+parserunits = {}
 
 -- All: Enables TEXT IS WORD functionality if enabled.
 function code(alreadyrun_)
